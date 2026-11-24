@@ -1,5 +1,7 @@
 # Deploy and Host Ollama API with Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/ollama-api-openai-compatible-api-key?referralCode=20H68q)
+
 Your own LLM API on Railway: Ollama runs open models on CPU on the private network, and a small gateway in front of it exposes an OpenAI-compatible API on a public HTTPS domain that only answers requests with your API key. A 1.5B chat model and an embedding model are pulled on the first start.
 
 ## About Hosting Ollama API
