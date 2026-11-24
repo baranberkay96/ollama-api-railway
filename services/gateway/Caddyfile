@@ -1,0 +1,73 @@
+# Ollama API gateway: the only public entry. Ollama itself has no
+# authentication, so every request needs the API key:
+#
+#   Authorization: Bearer {key}   (OpenAI SDKs, most clients)
+#   x-api-key: {key}              (Anthropic-style clients)
+#
+#   https://{domain}/healthz  -> this proxy (Railway healthcheck, no key)
+#   https://{domain}/v1/...   -> OpenAI-compatible API (chat, completions, embeddings, models)
+#   https://{domain}/api/...  -> Ollama's native API
+{
+	admin off
+	persist_config off
+	auto_https off
+	servers {
+		# Railway's edge terminates TLS and forwards X-Forwarded-* headers.
+		trusted_proxies static private_ranges 100.0.0.0/8
+	}
+}
+
+(to_ollama) {
+	request_header -Authorization
+	request_header -X-Api-Key
+	header -Server
+	reverse_proxy {$OLLAMA_UPSTREAM} {
+		# Stream tokens as they are generated.
+		flush_interval -1
+		# Ollama may still be starting after a redeploy.
+		lb_try_duration 30s
+		lb_try_interval 1s
+	}
+}
+
+:{$PORT:8080} {
+	log {
+		output stdout
+		format filter {
+			wrap console
+			fields {
+				request>headers>Authorization delete
+				request>headers>X-Api-Key delete
+			}
+		}
+	}
+
+	handle /healthz {
+		respond "ok" 200
+	}
+
+	@bearer header Authorization "Bearer {$OLLAMA_API_KEY}"
+	handle @bearer {
+		import to_ollama
+	}
+
+	@apikey header X-Api-Key "{$OLLAMA_API_KEY}"
+	handle @apikey {
+		import to_ollama
+	}
+
+	# CORS preflight requests carry no credentials; Ollama answers them.
+	@preflight {
+		method OPTIONS
+		header Access-Control-Request-Method *
+	}
+	handle @preflight {
+		import to_ollama
+	}
+
+	handle {
+		header WWW-Authenticate "Bearer"
+		header Content-Type "application/json"
+		respond `{"error":{"message":"Missing or invalid API key. Send Authorization: Bearer <OLLAMA_API_KEY>.","type":"invalid_request_error","code":"invalid_api_key"}}` 401
+	}
+}

@@ -1,0 +1,145 @@
+{
+ "name": "Ollama API (OpenAI-Compatible, API Key)",
+ "idSeed": "Ollama API (OpenAI-Compatible, API Key) / 2026-11-24",
+ "description": "Private Ollama LLM server with an OpenAI-compatible API behind an API key.",
+ "category": "AI/ML",
+ "tags": [
+  "ollama",
+  "llm",
+  "openai-compatible",
+  "api",
+  "self-hosted",
+  "ai",
+  "embeddings",
+  "qwen"
+ ],
+ "image": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/ollama.svg",
+ "upstream": {
+  "repo": "ollama/ollama",
+  "version": "v0.40.17",
+  "image": "ollama/ollama:0.40.17@sha256:ccc42bcd3d5fcf7ab0d532b300382154e1a4da56fc666bdb313b78ebdd912754",
+  "base": "ubuntu:noble-20261110.1@sha256:882e1e56091c9ffbc70c026ff5935fe85d3c91ad155917865ba2ffa23ede1560",
+  "gateway": "caddy:2.11.9-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0",
+  "checked": "2026-11-24"
+ },
+ "services": {
+  "API Gateway": {
+   "icon": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/caddy.svg",
+   "source": {
+    "repo": "baranberkay96/ollama-api-railway",
+    "rootDirectory": "/services/gateway"
+   },
+   "startCommand": null,
+   "preDeployCommand": null,
+   "healthcheckPath": "/healthz",
+   "healthcheckTimeout": 300,
+   "restartPolicyType": "ALWAYS",
+   "numReplicas": 1,
+   "cronSchedule": null,
+   "publicDomain": true,
+   "targetPort": 8080,
+   "tcpProxy": null,
+   "volume": null,
+   "variables": {
+    "OLLAMA_API_KEY": {
+     "defaultValue": "${{secret(48, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+     "description": "API key clients send as 'Authorization: Bearer {key}' (or x-api-key). 24-256 chars.",
+     "required": false
+    },
+    "API_BASE_URL": {
+     "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}/v1",
+     "description": "OpenAI-compatible base URL to paste into clients (informational).",
+     "required": false
+    },
+    "OLLAMA_UPSTREAM": {
+     "defaultValue": "${{Ollama.RAILWAY_PRIVATE_DOMAIN}}:11434",
+     "description": "Ollama on the private network.",
+     "required": false
+    },
+    "PORT": {
+     "defaultValue": "8080",
+     "description": "Gateway port; the public domain points here.",
+     "required": false
+    }
+   }
+  },
+  "Ollama": {
+   "icon": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/ollama.svg",
+   "source": {
+    "repo": "baranberkay96/ollama-api-railway",
+    "rootDirectory": "/services/ollama"
+   },
+   "startCommand": null,
+   "preDeployCommand": null,
+   "healthcheckPath": "/",
+   "healthcheckTimeout": 300,
+   "restartPolicyType": "ALWAYS",
+   "numReplicas": 1,
+   "cronSchedule": null,
+   "publicDomain": false,
+   "targetPort": null,
+   "tcpProxy": null,
+   "volume": {
+    "mountPath": "/root/.ollama"
+   },
+   "variables": {
+    "OLLAMA_PULL_MODELS": {
+     "defaultValue": "qwen2.5:1.5b,nomic-embed-text:v1.5",
+     "description": "Models pulled at start when missing (comma-separated): a 1 GB chat model and an embedding model.",
+     "required": false
+    },
+    "OLLAMA_NUM_THREAD": {
+     "defaultValue": "",
+     "description": "Optional CPU threads for inference. Empty: this service's CPU quota, at most 8.",
+     "required": false
+    },
+    "OLLAMA_CONTEXT_LENGTH": {
+     "defaultValue": "8192",
+     "description": "Default context window (tokens) for requests that do not set one.",
+     "required": false
+    },
+    "OLLAMA_KEEP_ALIVE": {
+     "defaultValue": "15m",
+     "description": "Unload a model after this idle time to free RAM (e.g. 5m, 1h, -1 = never).",
+     "required": false
+    },
+    "OLLAMA_MAX_LOADED_MODELS": {
+     "defaultValue": "2",
+     "description": "Models kept in RAM at once (chat + embeddings).",
+     "required": false
+    },
+    "OLLAMA_NUM_PARALLEL": {
+     "defaultValue": "1",
+     "description": "Requests one model handles at once; more needs more RAM and CPU.",
+     "required": false
+    },
+    "OLLAMA_FLASH_ATTENTION": {
+     "defaultValue": "1",
+     "description": "Flash attention, needed for the quantized KV cache.",
+     "required": false
+    },
+    "OLLAMA_KV_CACHE_TYPE": {
+     "defaultValue": "q8_0",
+     "description": "8-bit KV cache: about half the context memory, little quality loss.",
+     "required": false
+    },
+    "OLLAMA_ORIGINS": {
+     "defaultValue": "*",
+     "description": "Browser origins Ollama answers (CORS). The gateway still requires the API key.",
+     "required": false
+    },
+    "OLLAMA_HOST": {
+     "defaultValue": "[::]:11434",
+     "description": "Bind address (IPv4 + IPv6), private network only.",
+     "required": false
+    },
+    "PORT": {
+     "defaultValue": "11434",
+     "description": "Ollama port for Railway's healthcheck (private).",
+     "required": false
+    }
+   }
+  }
+ },
+ "buckets": []
+}
