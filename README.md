@@ -64,7 +64,7 @@ Give the Ollama service more RAM and vCPUs for larger models (Hobby or Pro). One
 
 **Resources**
 
-Measured on Railway: Ollama idles at about 30 MB with no model loaded and about 1.3 GB with the chat and embedding models loaded; the gateway uses about 15 MB. Loaded models need more than the Trial plan's 1 GB per service: use Hobby or higher. Cost while models are loaded is roughly $15–25/month in RAM plus the CPU your requests use; with short keep-alive times most of it disappears when the API is idle.
+Measured on Railway: Ollama uses about 1.3 GB with the chat and embedding models loaded, and Railway's memory graph keeps showing about that much after they unload, because it includes the kernel's file cache of the model files (released under memory pressure); the gateway uses about 25 MB. Loaded models need more than the Trial plan's 1 GB per service: use Hobby or higher. Expect roughly $13–25/month in RAM plus the CPU your requests use; larger models cost proportionally more.
 
 ### Why Deploy Ollama API on Railway?
 

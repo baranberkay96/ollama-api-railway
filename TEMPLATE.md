@@ -30,10 +30,10 @@ Ollama variables: `OLLAMA_PULL_MODELS` (qwen2.5:1.5b,nomic-embed-text:v1.5), `OL
 
 | Service | Idle RAM | Typical RAM | CPU |
 |---|---|---|---|
-| API Gateway | ≈15 MB (measured) | 20–40 MB | ≈0 |
-| Ollama | ≈30 MB no model loaded; ≈1.3 GB with both models loaded (measured) | 1.5–6 GB depending on models | up to 8 vCPU while generating |
+| API Gateway | ≈25 MB (measured) | 20–40 MB | ≈0 |
+| Ollama | ≈1.3 GB with both models loaded; ≈1.3 GB in the graph after unload too (file cache of the model blobs) (measured) | 1.5–6 GB depending on models | up to 8 vCPU while generating |
 
-Estimated: $1–3/month idle with models unloaded, $15–25/month while models stay loaded, plus CPU per request. Minimum plan: Hobby (loaded models exceed Trial's 1 GB).
+Estimated: $13–25/month RAM (models loaded or cached), plus CPU per request. Minimum plan: Hobby (loaded models exceed Trial's 1 GB).
 
 ## Verification checklist
 
